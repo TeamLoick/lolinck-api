@@ -18,5 +18,4 @@ async def detection_get(url: str, real_time: bool | None = False) -> None:
     if site_active(url) != True:
         raise HTTPException(status_code=400, detail='This domain is not registered or is invalid.')
     
-    print(search('twitch.tv'))
     return {'url': url, 'real_time': real_time}
