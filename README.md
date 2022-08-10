@@ -16,11 +16,11 @@ We have a lot of samples in our [documentation](https://lolinck.vercel.app/) for
 
 ## How it works
 The API use 3 methods to detect if a website is safe or not.
-**The first method**
+#### The first method
 is check in our db that we expand with the results of other methods. This db has also content from public dbs.
 
-**The second method**
+#### The second method
 is the logical method where we check the content of the page, the headers and all the information about the page to give a results. <br />
 
-And **the third method**
+### The third method
 that continues under development is the AI that have been trained with a lot of data from our db to detect if website is safe or not.
