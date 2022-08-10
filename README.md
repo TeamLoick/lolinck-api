@@ -15,4 +15,12 @@ Lolinck is an open source API that use machine learning to detect if a website i
 We have a lot of samples in our [documentation](https://lolinck.vercel.app/) for the most famous programming languages. We also have libraries for python and for nodejs. Or you can only make a simple request to our API. However you have to know that we put a limit for free users. If you are a free user you can only make 1 request per 2 seconds., and 1 million requests per month. If you want to remove this limit you can buy a premium plan. If you want to know about our premium tier check visit the next page.
 
 ## How it works
-Now we are in the process to recolect enought data to train our AI. To check links we check the content of the website, the code and the headers. We also check in our db and the biggest public db of links.
+The API use 3 methods to detect if a website is safe or not.
+**The first method**
+is check in our db that we expand with the results of other methods. This db has also content from public dbs.
+
+**The second method**
+is the logical method where we check the content of the page, the headers and all the information about the page to give a results. <br />
+
+And **the third method**
+that continues under development is the AI that have been trained with a lot of data from our db to detect if website is safe or not.
