@@ -23,19 +23,32 @@ db = _get_database()['logs']['activity']
 
 class Log():
     
-    def __init__(self, new: bool, type: str, link: str) -> None:
+    def __init__(self, new: bool, url: str, malicious: bool, nsfw: bool, malware: bool, phishing: bool, ip_logging: bool) -> None:
         
-        self.new = new
-        self.type = type
-        self.link = link
+        self.new: bool = new
+        self.url: str = url
+        self.malicious: bool = malicious
+        self.nsfw: bool = nsfw
+        self.malware: bool = malware
+        self.phishing: bool = phishing
+        self.ip_logging: bool = ip_logging
     
-    def register(self) -> None:
+    def add(self) -> None:
         
-        db.insert_one({
-            "date": datetime.datetime.now(),
-            "new": self.new,
-            "type": self.type,
-            "link": self.link
-        })
+        try:
         
+            db.insert_one({
+                "DATE": datetime.datetime.now(),
+                "URL": self.url,
+                "NEW": self.new,
+                "MALICIOUS": self.malicious,
+                "NSFW": self.nsfw,
+                "MALWARE": self.malware,
+                "PHISHING": self.phishing,
+                "IP_LOGGING": self.ip_logging
+            })
+            
+        except:
+        
+            return None
         
