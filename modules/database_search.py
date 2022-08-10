@@ -6,27 +6,16 @@ db = _get_database()['links']['list']
 
 def search(domain: str) -> dict:
     
-    s = db.find_one({'link': domain})
+    s = db.find_one({'url': domain})
     
     try:
         
-        if s['type'] == 'malware' or s['type'] == 'phishing':
-            malicious = True 
-        else:
-            malicious = False
+        Log(False, s['url'], s['malicious'], s['nsfw'], s['malware'], s['phishing'], s['ip_logging']).add()
             
-            
-        if s['type'] == 'nsfw':
-            nsfw = True
-        else:
-            nsfw = False
-            
-            
-        Log(False, s['type'], s['link']).register()
-            
-        return {'malicious': malicious, 'nsfw': nsfw, 'link': s['link'], 'type': s['type']}
+        return {'URL': s['link'], 'MALICIOUS': s['malicious'], 'NSFW': s['nsfw'], 'MALWARE': s['malware'], 'PHISHING': s['phishing'], 'IP_LOGGING': s['ip_logging']}
     
     except:
         
         return False
+    
     
