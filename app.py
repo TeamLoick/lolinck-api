@@ -54,7 +54,6 @@ def _create_app() -> FastAPI:
     except Exception as Error:
 
         logging.error('Could not create application |' + str(Error))
-        return None
 
 
 def _app_routes(app, routes: list) -> None:
@@ -79,4 +78,3 @@ def _app_routes(app, routes: list) -> None:
     except Exception as Error:
 
         logging.error('Could not include routes |' + str(Error))
-        return None
