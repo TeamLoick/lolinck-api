@@ -37,6 +37,4 @@ class Link():
             return None
             
         except Exception as e:
-            print(e)
-        
-        
+            print(e)  
