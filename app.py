@@ -73,8 +73,6 @@ def _app_routes(app, routes: list) -> None:
         for x in routes:
             app.include_router(x, prefix="/v1")
 
-        return None
-
     except Exception as Error:
 
         logging.error('Could not include routes |' + str(Error))
