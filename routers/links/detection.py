@@ -1,21 +1,38 @@
+from typing import Any
 from fastapi import APIRouter, HTTPException
 from lib.validator import site_active, domain_valid
-from models.log_model import Log
-from modules.database_search import search
-from models.add_model import Link
+from lib.checker import LinkInfo
+from exceptions.IncorrectParameter import IncorrectParamsException
 
 detection = APIRouter()
 
-@detection.get("/detection/")
-async def detection_get(url: str, real_time: bool | None = False) -> None:
-    
+
+@detection.get("/detection/", status_code=200)
+async def detection_get(url: str) -> str | bool | dict[str, Any]:
+
     if url == '':
-        raise HTTPException(status_code=400, detail='You did not enter the desired url to be classified.')
-    
+        raise IncorrectParamsException(details="You have not entered any value in the URL parameter")
+
     if domain_valid(url) is False:
-        raise HTTPException(status_code=400, detail='Enter a valid url/domain.')
-    
-    if site_active(url) != True:
-        raise HTTPException(status_code=400, detail='This domain is not registered or is invalid.')
-    
-    return {'url': url, 'real_time': real_time}
+        raise IncorrectParamsException(details="The URL is not valid.")
+
+    if not site_active(url):
+        raise IncorrectParamsException(details="The URL is invalid or has not been registered.")
+
+    try:
+
+        info = LinkInfo(url).database_search()
+
+        if info:
+
+            return info
+
+        else:
+
+            return 'Not found'
+
+    except:
+
+        raise 'Link type could not be detected. Please try again'
+
+    return {'url': url}

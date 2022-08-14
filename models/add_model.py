@@ -23,7 +23,7 @@ class Link():
             
             db.insert_one({
                 
-                'id': self.id,
+                '_id': self.id,
                 'url': self.url,
                 'malicious': self.malicious,
                 'nsfw': self.nsfw,
@@ -37,4 +37,6 @@ class Link():
             return None
             
         except Exception as e:
-            print(e)  
+            print(e)
+        
+        

@@ -1,20 +1,22 @@
-import requests
+from modules.database_search import search
+from lib.validator import url_to_domain
 
 class LinkInfo():
     
-    def __init__(self, url: str, real_time: bool) -> None:
+    def __init__(self, url: str) -> None:
         
-        self.url = url
-        self.real_time = real_time
+        self.url: str = url
         
-    def database_search(self) -> bool:
-        
-        try:
-            
-            pass
-            
-        except Exception as e:
-            
+    def database_search(self) -> bool | dict:
+
+        domain = url_to_domain(self.url)
+        results = search(domain)
+
+        if results is not False:
+            return results
+
+        else:
+
             return False
         
     def path_search(self) -> bool:

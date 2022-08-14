@@ -16,41 +16,43 @@ def _get_database() -> MongoClient:
     '''
     Returns the MongoClient Object
 
-            Parameters:
-                    None
-
             Returns:
                     client (object): MongoClient object
     '''
-    
+
     try:
 
         client = MongoClient(getenv('MONGO_URI'))
 
         return client
-    
+
     except Exception as Error:
-            
-            logging.error('Could not establish connection with MongoDB |' + str(Error))
+
+        logging.error('Could not establish connection with MongoDB |' + str(Error))
 
 
 def _create_app() -> FastAPI:
     '''
     Create the fastapi application
 
-            Parameters:
-                    None
-
             Returns:
                     app (object): FastAPI object
     '''
-    
+
     try:
 
-        app = FastAPI()
+        app = FastAPI(
+
+            title='Lolinck',
+            description="Lolinck is an open source API that use machine learning to detect if a website is safe or "
+                        "not. It can detect NSFW, phishing, malware, ip logging and more.",
+            version='1.0.0',
+            docs_url=None
+
+        )
 
         return app
-    
+
     except Exception as Error:
 
         logging.error('Could not create application |' + str(Error))
@@ -73,6 +75,9 @@ def _app_routes(app, routes: list) -> None:
         for x in routes:
             app.include_router(x, prefix="/v1")
 
+        return None
+
     except Exception as Error:
 
         logging.error('Could not include routes |' + str(Error))
+        return None

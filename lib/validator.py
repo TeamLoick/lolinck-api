@@ -90,12 +90,33 @@ def domain_valid(url: str) -> bool:
         return False
 
 
+def url_to_domain(url: str) -> str:
+    '''
+        Get the domain from the url
+
+                Parameters:
+                        url (str): The url to get the domain from
+
+                Returns:
+                        d (str): The domain name
+    '''
+
+    d: str = url.lower()
+
+    if url.startswith('http://') or url.startswith('https://'):
+        d = d.split('/')[2]
+
+    if d.endswith('/'):
+        d = d.split('/')[0]
+
+    return d
+
+
+
+
 def gen_id() -> str:
     '''
         Generate unique id
-
-                Parameters:
-                        None
 
                 Returns:
                         str: The unique id generated

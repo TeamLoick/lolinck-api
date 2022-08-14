@@ -4,7 +4,7 @@ from models.log_model import Log
 db = _get_database()['links']['list']
 
 
-def search(domain: str) -> dict:
+def search(domain: str) -> dict | bool:
     '''
         Returns the search results from the given domain
 
@@ -23,6 +23,5 @@ def search(domain: str) -> dict:
         return {'url': s['url'], 'malicious': s['malicious'], 'nsfw': s['nsfw'], 'malware': s['malware'],
                 'phishing': s['phishing'], 'ip_logging': s['ip_logging']}
 
-    except:
-
-        return None
+    except TypeError:
+        return False
