@@ -22,10 +22,12 @@ lolinck.xyz/privacy
 
 db = _get_database()['logs']['activity']
 
-class Log():
-    
-    def __init__(self, new: bool, url: str, malicious: bool, nsfw: bool, malware: bool, phishing: bool, ip_logging: bool) -> None:
-        
+
+class Log:
+
+    def __init__(self, new: bool, url: str, malicious: bool, nsfw: bool, malware: bool, phishing: bool,
+                 ip_logging: bool) -> None:
+
         self.id = gen_id()
         self.new: bool = new
         self.url: str = url
@@ -35,13 +37,13 @@ class Log():
         self.phishing: bool = phishing
         self.ip_logging: bool = ip_logging
         self.added_at: datetime.datetime = datetime.datetime.utcnow()
-    
+
     def add(self) -> None:
-        
+
         try:
-            
+
             db.insert_one({
-                
+
                 'id': self.id,
                 'new': self.new,
                 'url': self.url,
@@ -51,13 +53,10 @@ class Log():
                 'phishing': self.phishing,
                 'ip_logging': self.ip_logging,
                 'added_at': self.added_at
-                
+
             })
-            
+
             return None
-            
+
         except Exception as e:
             print(e)
-        
-        
-        

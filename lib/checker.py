@@ -1,12 +1,13 @@
 from modules.database_search import search
 from lib.validator import url_to_domain
 
-class LinkInfo():
-    
+
+class LinkInfo:
+
     def __init__(self, url: str) -> None:
-        
+
         self.url: str = url
-        
+
     def database_search(self) -> bool | dict:
 
         domain = url_to_domain(self.url)
@@ -18,25 +19,25 @@ class LinkInfo():
         else:
 
             return False
-        
-    def path_search(self) -> bool:
-        
+
+    @staticmethod
+    def path_search() -> bool:
+
         try:
-            
+
             pass
-            
+
         except Exception as e:
-            
-            return False 
-        
-        
-    def thread_scan(self) -> bool:
-        
+            print(e)
+            return False
+
+    @staticmethod
+    def thread_scan() -> bool:
+
         try:
-            
+
             pass
-            
+
         except Exception as e:
-            
-            return False       
-        
+            print(e)
+            return False
