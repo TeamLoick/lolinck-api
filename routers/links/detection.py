@@ -1,5 +1,5 @@
 from typing import Any
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Request
 from lib.validator import site_active, domain_valid
 from lib.checker import LinkInfo
 from exceptions.IncorrectParameter import IncorrectParamsException
@@ -7,9 +7,9 @@ from exceptions.IncorrectParameter import IncorrectParamsException
 detection = APIRouter()
 
 
-@detection.get("/detection/", status_code=200)
-async def detection_get(url: str) -> str | bool | dict[str, Any]:
-
+# noinspection PyUnreachableCode
+@detection.get("/detection", status_code=200)
+async def detection_get(url: str, request: Request) -> str | bool | dict[str, Any]:
     if url == '':
         raise IncorrectParamsException(details="You have not entered any value in the URL parameter")
 
@@ -25,7 +25,7 @@ async def detection_get(url: str) -> str | bool | dict[str, Any]:
 
         if info:
 
-            return info
+            return {'url': url}
 
         else:
 
@@ -33,6 +33,4 @@ async def detection_get(url: str) -> str | bool | dict[str, Any]:
 
     except:
 
-        raise 'Link type could not be detected. Please try again'
-
-    return {'url': url}
+        return 'Link type could not be detected. Please try again'

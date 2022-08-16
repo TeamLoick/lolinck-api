@@ -2,6 +2,10 @@ import logging
 from fastapi import FastAPI
 from pymongo import MongoClient
 from dotenv import load_dotenv, find_dotenv
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.errors import RateLimitExceeded
+from config import limiter
 from os import getenv
 
 load_dotenv(find_dotenv(raise_error_if_not_found=True))
@@ -13,12 +17,12 @@ logging.basicConfig(
 
 
 def _get_database() -> MongoClient:
-    '''
+    """
     Returns the MongoClient Object
 
             Returns:
                     client (object): MongoClient object
-    '''
+    """
 
     try:
 
@@ -32,12 +36,12 @@ def _get_database() -> MongoClient:
 
 
 def _create_app() -> FastAPI:
-    '''
+    """
     Create the fastapi application
 
             Returns:
                     app (object): FastAPI object
-    '''
+    """
 
     try:
 
@@ -51,6 +55,10 @@ def _create_app() -> FastAPI:
 
         )
 
+        app.state.limiter = limiter
+        app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+        app.add_middleware(SlowAPIMiddleware)
+
         return app
 
     except Exception as Error:
@@ -59,7 +67,7 @@ def _create_app() -> FastAPI:
 
 
 def _app_routes(app, routes: list) -> None:
-    '''
+    """
     Include the routes in the application
 
             Parameters:
@@ -68,7 +76,7 @@ def _app_routes(app, routes: list) -> None:
 
             Returns:
                     None
-    '''
+    """
 
     try:
 

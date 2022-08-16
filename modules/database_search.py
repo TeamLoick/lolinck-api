@@ -5,7 +5,7 @@ db = _get_database()['links']['list']
 
 
 def search(domain: str) -> dict | bool:
-    '''
+    """
         Returns the search results from the given domain
 
                 Parameters:
@@ -13,7 +13,7 @@ def search(domain: str) -> dict | bool:
 
                 Returns:
                         dict: Database results or None if no results were found
-    '''
+    """
 
     s = db.find_one({'url': domain})
 

@@ -2,8 +2,9 @@ import socket
 import uuid
 
 
+# noinspection PyBroadException
 def site_active(url: str) -> bool:
-    '''
+    """
         Check if the site is registered
 
                 Parameters:
@@ -11,8 +12,9 @@ def site_active(url: str) -> bool:
 
                 Returns:
                         bool: True or False depending on whether the site is registered or not
-    '''
+    """
 
+    # noinspection PyBroadException
     try:
 
         domain = url.lower()
@@ -41,7 +43,7 @@ def site_active(url: str) -> bool:
 
 
 def domain_valid(url: str) -> bool:
-    '''
+    """
         Check if the domain has valid syntax
 
                 Parameters:
@@ -49,7 +51,7 @@ def domain_valid(url: str) -> bool:
 
                 Returns:
                         bool: True or False depending on whether the site is valid or not
-    '''
+    """
 
     try:
 
@@ -91,7 +93,7 @@ def domain_valid(url: str) -> bool:
 
 
 def url_to_domain(url: str) -> str:
-    '''
+    """
         Get the domain from the url
 
                 Parameters:
@@ -99,7 +101,7 @@ def url_to_domain(url: str) -> str:
 
                 Returns:
                         d (str): The domain name
-    '''
+    """
 
     d: str = url.lower()
 
@@ -112,14 +114,12 @@ def url_to_domain(url: str) -> str:
     return d
 
 
-
-
 def gen_id() -> str:
-    '''
+    """
         Generate unique id
 
                 Returns:
                         str: The unique id generated
-    '''
+    """
 
     return str(uuid.uuid4())
