@@ -44,7 +44,7 @@ class Log:
 
             db.insert_one({
 
-                'id': self.id,
+                '_id': self.id,
                 'new': self.new,
                 'url': self.url,
                 'malicious': self.malicious,
