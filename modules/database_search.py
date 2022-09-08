@@ -1,10 +1,11 @@
 from app import _get_database
-from models.log_model import Log
+from cachetools import cached, TTLCache
 
 db = _get_database()['links']['list']
 
 
-def search(domain: str) -> dict | bool:
+@cached(cache=TTLCache(maxsize=10, ttl=86400))
+def search(domain: str) -> dict | None:
     """
         Returns the search results from the given domain
 
@@ -19,9 +20,8 @@ def search(domain: str) -> dict | bool:
 
     try:
 
-        Log(False, s['url'], s['malicious'], s['nsfw'], s['malware'], s['phishing'], s['ip_logging']).add()
         return {'url': s['url'], 'malicious': s['malicious'], 'nsfw': s['nsfw'], 'malware': s['malware'],
                 'phishing': s['phishing'], 'ip_logging': s['ip_logging']}
 
     except TypeError:
-        return False
+        return None

@@ -2,8 +2,10 @@ import logging
 from fastapi import FastAPI
 from pymongo import MongoClient
 from dotenv import load_dotenv, find_dotenv
-from slowapi import _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler as _rate
 from slowapi.middleware import SlowAPIMiddleware
+from fastapi_cache import caches
+from fastapi_cache.backends.redis import CACHE_KEY
 from slowapi.errors import RateLimitExceeded
 from config import limiter
 from os import getenv
@@ -56,7 +58,7 @@ def _create_app() -> FastAPI:
         )
 
         app.state.limiter = limiter
-        app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+        app.add_exception_handler(RateLimitExceeded, _rate)
         app.add_middleware(SlowAPIMiddleware)
 
         return app
@@ -88,4 +90,14 @@ def _app_routes(app, routes: list) -> None:
     except Exception as Error:
 
         logging.error('Could not include routes |' + str(Error))
-        return None
+
+
+def _redis_cache():
+    """
+    Caches the Redis instance
+
+        Returns:
+            caches (object): Redis Cache Key_func
+    """
+
+    return caches.get(CACHE_KEY)

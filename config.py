@@ -6,6 +6,5 @@ from os import getenv
 load_dotenv(find_dotenv(raise_error_if_not_found=True))
 
 limiter = Limiter(key_func=get_remote_address,
-                  default_limits=["3000/day", "8/seconds"],
+                  default_limits=["3000/day", "5/seconds"],
                   storage_uri=getenv('REDIS_URI'))
-

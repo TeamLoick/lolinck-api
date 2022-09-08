@@ -1,5 +1,6 @@
 import socket
 import uuid
+from requests import ConnectionError, head
 
 
 # noinspection PyBroadException
@@ -123,3 +124,19 @@ def gen_id() -> str:
     """
 
     return str(uuid.uuid4())
+
+
+def get_status_code(url: str) -> int | None:
+    """
+        Get the status code
+
+                Returns:
+                        int: The status code
+    """
+
+    try:
+        r = head(url)
+        return r.status_code
+
+    except ConnectionError:
+        return None

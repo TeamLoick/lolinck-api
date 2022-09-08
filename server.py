@@ -4,6 +4,8 @@ from dotenv import load_dotenv, find_dotenv
 from fastapi.exceptions import RequestValidationError
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from fastapi_cache import caches, close_caches
+from fastapi_cache.backends.redis import CACHE_KEY, RedisCacheBackend
 from slowapi.errors import RateLimitExceeded
 from routers.links.detection import detection
 from exceptions.IncorrectParameter import IncorrectParamsException
@@ -16,7 +18,7 @@ if __name__ == '__main__':
     app = _create_app()
     _app_routes(app, [detection])
 
-
+    # Exceptions Handling
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
         return JSONResponse(
@@ -66,6 +68,17 @@ if __name__ == '__main__':
                                                                                      "route.",
                      "docs": "https://docs.lolinck.xyz/errors/parameters"},
         )
+
+    # Startup and shutdown handlers
+    @app.on_event('startup')
+    async def on_startup() -> None:
+        rc = RedisCacheBackend(getenv('REDIS_URI'))
+        caches.set(CACHE_KEY, rc)
+
+
+    @app.on_event('shutdown')
+    async def on_shutdown() -> None:
+        await close_caches()
 
 
     run(app, host='0.0.0.0', port=int(getenv('APP_PORT')))

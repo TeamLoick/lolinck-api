@@ -1,15 +1,19 @@
 from typing import Any
-from fastapi import APIRouter, Request
-from lib.validator import site_active, domain_valid
+from json import dumps, loads
+from fastapi import APIRouter, Request, Depends
+from lib.validator import site_active, domain_valid, url_to_domain
 from lib.checker import LinkInfo
 from exceptions.IncorrectParameter import IncorrectParamsException
+from fastapi_cache.backends.redis import RedisCacheBackend
+from app import _redis_cache
 
 detection = APIRouter()
 
 
-# noinspection PyUnreachableCode
+# noinspection PyBroadException
 @detection.get("/detection", status_code=200)
-async def detection_get(url: str, request: Request) -> str | bool | dict[str, Any]:
+async def detection_get(url: str, cache: RedisCacheBackend = Depends(_redis_cache)) -> str | bool | dict[str, Any]:
+
     if url == '':
         raise IncorrectParamsException(details="You have not entered any value in the URL parameter")
 
@@ -21,16 +25,16 @@ async def detection_get(url: str, request: Request) -> str | bool | dict[str, An
 
     try:
 
-        info = LinkInfo(url).database_search()
+        # We convert the information into a json for saving it in the cache
+        domain = url_to_domain(url)
+        in_cache = await cache.get(domain)
+        info = dumps(LinkInfo(url).database_search())
+        info_json = loads(info)
 
-        if info:
+        if not in_cache:
+            await cache.set(domain, info_json)
 
-            return {'url': url}
-
-        else:
-
-            return 'Not found'
+        return in_cache or info_json
 
     except:
-
         return 'Link type could not be detected. Please try again'
