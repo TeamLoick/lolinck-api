@@ -1,6 +1,9 @@
 import datetime
-from lib.validator import gen_id
-from app import _get_database
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from lib.validator import gen_id
+    from app import _get_database
 
 db = _get_database()['links']['list']
 

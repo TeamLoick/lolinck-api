@@ -1,121 +1,148 @@
+import aiohttp
+import asyncio
 from json import load
-from metadata_parser import MetadataParser, NotParsableFetchError
-from lib.validator import get_status_code
-from datetime import datetime
-from difflib import SequenceMatcher
-from os.path import split
 from tldextract import extract
+import warnings
+from os.path import split
+from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
+from typing import TYPE_CHECKING
+from urllib.parse import urlparse
 
+warnings.filterwarnings('ignore', category=XMLParsedAsHTMLWarning)
 
-class URlSearch:
+if TYPE_CHECKING:
+    from lib.validator import get_status_code
 
-    @staticmethod
-    def nsfw(url: str) -> bool:
-        """
-            **
+async def Scrapper(url: str,
+                   NSFW=False,
+                   PHISHING=False,
+                   MALWARE=False,
+                   IPLOGGER=False) -> bool | None:
+    async with aiohttp.ClientSession() as session:
 
-                    Parameters:
-                            url (str): Domain to search
+        headers = {
+            'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.102 Safari/537.36',
+            'Content-Type': 'text/html'
+        }
 
-                    Returns:
-                            dict: Path results for the given domain
-        """
+        async with session.get(url=url, headers=headers) as resp:
 
-        with open("../commons/nsfw_keywords.json", "r") as file:
-            nsfw_keys = load(file)
+            body = await resp.text()
+            soup = BeautifulSoup(body, 'html.parser')
 
-        xxx_suffixes = ['xxx', 'adult', 'porn', 'sex']
-        extracted_url = extract(url)
+            # Be very carefull with the keywords, our api only use specific keywords
+            # Using every term like ['porn', 'sex'] will cause false positives.
+            # Our keywords avoid 99% false positives. (25k Keywords in total)
 
-        for x in xxx_suffixes:
-            if x in extracted_url.suffix:
-                return True
+            with open("./commons/nsfw/keywords.json", "r") as file:
+                nsfw_keywords = load(file)
 
-        for x in nsfw_keys:
-            if x in extracted_url.domain:
-                return True
+            with open("./commons/nsfw/meta_keywords.json", "r") as file:
+                nsfw_meta_keywords = load(file)
 
-        for x in nsfw_keys:
-            if x in extracted_url.subdomain:
-                return True
+            with open("./commons/nsfw/suffixes.json", "r") as file:
+                nsfw_suffixes = load(file)
 
-        for x in nsfw_keys:
-            if x in split(url):
-                return True
+            with open("./commons/nsfw/paths.json", "r") as file:
+                nsfw_paths = load(file)
 
-        if get_status_code(url) != 200:
-            return False
+            ####
 
-        try:
+            extracted_url = extract(url)
 
-            #www = MetadataParser(url=url,
-            #                     search_head_only=False,
-            #                     support_malformed=True,
-            #                     force_doctype=True)
+            for x in nsfw_suffixes:
+                if x in extracted_url.suffix:
+                    NSFW = True
 
-            #_title_ = www.metadata['page']['title']
-            #_description_ = www.get_metadatas('description')
-            #_keywords_ = www.get_metadatas('keywords')
-            
-            _title_ = soup.find("meta",  property="og:title", content=True)
-            _description_ = soup.find("meta",  property="og:title", content=True)
-            _keywords_ = soup.find("meta",  property="og:title", content=True)
+            for x in nsfw_suffixes:
+                if x in extracted_url.domain:
+                    NSFW = True
 
-            if _keywords_ is not None:
-                for x in _keywords_:
-                    x[0].split()
-                    for y in nsfw_keys:
-                        if y in x:
-                            return True
+            for x in nsfw_suffixes:
+                if x in extracted_url.subdomain:
+                    NSFW = True
 
-            if _description_ is not None:
-                for x in _description_:
-                    x[0].split()
-                    for y in nsfw_keys:
-                        if y in x:
-                            return True
+            for x in nsfw_paths:
+                if x in urlparse(url).path:
+                    NSFW = True
 
-            if _m_title_ is not None:
-                for x in _m_title_:
-                    x[0].split()
-                    for y in nsfw_keys:
-                        if y in x:
-                            return True
+            try:
 
-            if _title_ is not None:
-                for x in _title_:
-                    x[0].split()
-                    for y in nsfw_keys:
-                        if y in x:
-                            return True
+                _title_ = soup.find("meta",
+                                    {"property": "og:title"})["content"]
 
-            return False
+                _description_ = soup.find("meta",
+                                          {"property": "og:description"})["content"]
 
-        except NotParsableFetchError:
-            return False
+                _keywords_ = soup.find("meta",
+                                       {'name': 'keywords'})["content"]
 
-        except IndexError:
-            return False
+                if _keywords_ is not None:
+                    if nsfw_meta_keywords in _keywords_:
+                        NSFW = True
 
-    @staticmethod
-    def phishing(url: str) -> bool:
-        """
-            **
+                if _description_ is not None:
+                    if nsfw_keywords in _description_:
+                        NSFW = True
 
-                    Parameters:
-                            url (str): Domain to search
+                if _title_ is not None:
+                    if nsfw_keywords in _title_:
+                        NSFW = True
 
-                    Returns:
-                            dict: Path results for the given domain
-        """
+            except IndexError:
+                pass
 
-        domain = extract(url)
-        return domain.subdomain, domain.domain, domain.suffix
+            except TypeError:
+                pass
 
-        # PATH
+            try:
 
-        # OTHERS
+                for x in soup.find_all("a"):
+                    for y in nsfw_keywords:
+                        if y in x.text:
+                            NSFW = True
 
+                for x in soup.find_all("span"):
+                    for y in nsfw_keywords:
+                        if y in x.text:
+                            NSFW = True
 
-u = URlSearch()
-print(u.nsfw('https://fr.pornhub.com'))
+                for x in soup.find_all("h1"):
+                    for y in nsfw_keywords:
+                        if y in x.text:
+                            NSFW = True
+
+                for x in soup.find_all("h2"):
+                    for y in nsfw_keywords:
+                        if y in x.text:
+                            NSFW = True
+
+                for x in soup.find_all("h3"):
+                    for y in nsfw_keywords:
+                        if y in x.text:
+                            NSFW = True
+
+                for x in soup.find_all("div"):
+                    for y in nsfw_keywords:
+                        if y in x.text:
+                            NSFW = True
+
+                # Detect NSFW SubReddits (100% Acurracy)
+                if soup.find_all("div",
+                                 {"class": "_2GSkrIFkojWV3L0GzQPQ78"}):
+                    NSFW = True
+
+            except TypeError:
+                pass
+
+            except IndexError:
+                pass
+
+            # Return by default False
+            return {
+                'NSFW': NSFW,
+                'PHISHING': PHISHING,
+                'IPLOGGER': IPLOGGER,
+                'MALWARE': MALWARE
+            }

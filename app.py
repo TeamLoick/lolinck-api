@@ -2,13 +2,16 @@ import logging
 from fastapi import FastAPI
 from pymongo import MongoClient
 from dotenv import load_dotenv, find_dotenv
+from typing import TYPE_CHECKING
 from slowapi import _rate_limit_exceeded_handler as _rate
 from slowapi.middleware import SlowAPIMiddleware
 from fastapi_cache import caches
 from fastapi_cache.backends.redis import CACHE_KEY
 from slowapi.errors import RateLimitExceeded
-from config import limiter
 from os import getenv
+
+if TYPE_CHECKING:
+    from config import limiter
 
 load_dotenv(find_dotenv(raise_error_if_not_found=True))
 

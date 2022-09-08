@@ -1,5 +1,8 @@
-from app import _get_database
 from cachetools import cached, TTLCache
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app import _get_database
 
 db = _get_database()['links']['list']
 

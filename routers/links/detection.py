@@ -1,14 +1,16 @@
 from typing import Any
 from json import dumps, loads
 from fastapi import APIRouter, Request, Depends
-from lib.validator import site_active, domain_valid, url_to_domain
-from lib.checker import LinkInfo
-from exceptions.IncorrectParameter import IncorrectParamsException
 from fastapi_cache.backends.redis import RedisCacheBackend
-from app import _redis_cache
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from exceptions.IncorrectParameter import IncorrectParamsException
+    from lib.validator import site_active, domain_valid, url_to_domain
+    from lib.checker import LinkInfo
+    from app import _redis_cache
 
 detection = APIRouter()
-
 
 # noinspection PyBroadException
 @detection.get("/detection", status_code=200)

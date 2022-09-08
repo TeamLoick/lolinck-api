@@ -1,15 +1,18 @@
 from uvicorn import run
-from app import _create_app, _app_routes
 from dotenv import load_dotenv, find_dotenv
 from fastapi.exceptions import RequestValidationError
 from fastapi import Request
+from typing import TYPE_CHECKING
 from fastapi.responses import JSONResponse
 from fastapi_cache import caches, close_caches
 from fastapi_cache.backends.redis import CACHE_KEY, RedisCacheBackend
 from slowapi.errors import RateLimitExceeded
-from routers.links.detection import detection
-from exceptions.IncorrectParameter import IncorrectParamsException
 from os import getenv
+
+if TYPE_CHECKING:
+    from routers.links.detection import detection
+    from app import _create_app, _app_routes
+    from exceptions.IncorrectParameter import IncorrectParamsException
 
 load_dotenv(find_dotenv(raise_error_if_not_found=True))
 
