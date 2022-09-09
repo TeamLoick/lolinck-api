@@ -84,4 +84,4 @@ if __name__ == '__main__':
         await close_caches()
 
 
-    run(app, host='0.0.0.0', port=int(getenv('APP_PORT')))
+    run(app, host='0.0.0.0', port=int(getenv('APP_PORT')) or 8000, reload=True)
