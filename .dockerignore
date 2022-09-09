@@ -9,6 +9,5 @@ __pycache__/
 screenshot/
 tests/
 *.txt
-!/requirements.txt
 venv/
 app.log
