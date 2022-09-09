@@ -5,7 +5,8 @@ from tldextract import extract
 import warnings
 from os.path import split
 from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
-from typing import TYPE_CHECKING
+from bs4.dammit import EncodingDetector
+from typing import TYPE_CHECKING, Dict
 from urllib.parse import urlparse
 
 warnings.filterwarnings('ignore', category=XMLParsedAsHTMLWarning)
@@ -13,11 +14,12 @@ warnings.filterwarnings('ignore', category=XMLParsedAsHTMLWarning)
 if TYPE_CHECKING:
     from lib.validator import get_status_code
 
+
 async def Scrapper(url: str,
                    NSFW=False,
                    PHISHING=False,
                    MALWARE=False,
-                   IPLOGGER=False) -> bool | None:
+                   IPLOGGER=False) -> dict[str, bool]:
     async with aiohttp.ClientSession() as session:
 
         headers = {
@@ -26,14 +28,16 @@ async def Scrapper(url: str,
             'Content-Type': 'text/html'
         }
 
-        async with session.get(url=url, headers=headers) as resp:
+        async with session.get(url=url, headers=headers, ssl=False) as resp:
 
             body = await resp.text()
+            # print(await resp.text())
             soup = BeautifulSoup(body, 'html.parser')
 
             # Be very carefull with the keywords, our api only use specific keywords
             # Using every term like ['porn', 'sex'] will cause false positives.
             # Our keywords avoid 99% false positives. (25k Keywords in total)
+            # Our keywords are totally private.
 
             with open("./commons/nsfw/keywords.json", "r") as file:
                 nsfw_keywords = load(file)
@@ -72,22 +76,22 @@ async def Scrapper(url: str,
                 _title_ = soup.find("meta",
                                     {"property": "og:title"})["content"]
 
+                if _title_ is not None:
+                    if any(x in _title_ for x in nsfw_keywords):
+                        NSFW = True
+
+            except IndexError:
+                pass
+
+            except TypeError:
+                pass
+
+            try:
                 _description_ = soup.find("meta",
                                           {"property": "og:description"})["content"]
 
-                _keywords_ = soup.find("meta",
-                                       {'name': 'keywords'})["content"]
-
-                if _keywords_ is not None:
-                    if nsfw_meta_keywords in _keywords_:
-                        NSFW = True
-
                 if _description_ is not None:
-                    if nsfw_keywords in _description_:
-                        NSFW = True
-
-                if _title_ is not None:
-                    if nsfw_keywords in _title_:
+                    if any(x in _description_ for x in nsfw_keywords):
                         NSFW = True
 
             except IndexError:
@@ -98,46 +102,81 @@ async def Scrapper(url: str,
 
             try:
 
-                for x in soup.find_all("a"):
-                    for y in nsfw_keywords:
-                        if y in x.text:
-                            NSFW = True
+                _keywords_ = soup.find("meta",
+                                       {'name': 'keywords'})["content"]
 
-                for x in soup.find_all("span"):
-                    for y in nsfw_keywords:
-                        if y in x.text:
-                            NSFW = True
+                if _keywords_ is not None:
+                    if any(x in _keywords_ for x in nsfw_meta_keywords):
+                        NSFW = True
 
-                for x in soup.find_all("h1"):
-                    for y in nsfw_keywords:
-                        if y in x.text:
-                            NSFW = True
 
-                for x in soup.find_all("h2"):
-                    for y in nsfw_keywords:
-                        if y in x.text:
-                            NSFW = True
-
-                for x in soup.find_all("h3"):
-                    for y in nsfw_keywords:
-                        if y in x.text:
-                            NSFW = True
-
-                for x in soup.find_all("div"):
-                    for y in nsfw_keywords:
-                        if y in x.text:
-                            NSFW = True
-
-                # Detect NSFW SubReddits (100% Acurracy)
-                if soup.find_all("div",
-                                 {"class": "_2GSkrIFkojWV3L0GzQPQ78"}):
-                    NSFW = True
+            except IndexError:
+                pass
 
             except TypeError:
                 pass
 
-            except IndexError:
-                pass
+            for x in soup.find_all("img", alt=True):
+                for y in nsfw_keywords:
+                    if y in x['alt']:
+                        NSFW = True
+
+            for x in soup.find_all("a"):
+                for y in nsfw_keywords:
+                    if y in x.text:
+                        NSFW = True
+
+            for x in soup.find_all("span"):
+                for y in nsfw_keywords:
+                    if y in x.text:
+                        NSFW = True
+
+            for x in soup.find_all("h1"):
+                for y in nsfw_keywords:
+                    if y in x.text:
+                        NSFW = True
+
+            for x in soup.find_all("h2"):
+                for y in nsfw_keywords:
+                    if y in x.text:
+                        NSFW = True
+
+            for x in soup.find_all("h3"):
+                for y in nsfw_keywords:
+                    if y in x.text:
+                        NSFW = True
+
+            for x in soup.find_all("div"):
+                for y in nsfw_keywords:
+                    if y in x.text:
+                        NSFW = True
+
+            # Detect NSFW SubReddits (100% Acurracy)
+            if soup.find_all("div",
+                             {"class": "_2GSkrIFkojWV3L0GzQPQ78"}):
+                NSFW = True
+
+            # Find RTA Image
+            if soup.find('img', alt='RTA'):
+                NSFW = True
+
+            elif soup.find('img', alt='RTA image'):
+                NSFW = True
+
+            elif soup.find('img', alt='RTAimage'):
+                NSFW = True
+
+            elif soup.find('img', alt='RTA img'):
+                NSFW = True
+
+            elif soup.find('img', alt='RTA icon'):
+                NSFW = True
+
+            elif soup.find('img', alt='RTA badge'):
+                NSFW = True
+
+            elif soup.find('img', {'class': 'rta'}):
+                NSFW = True
 
             # Return by default False
             return {
