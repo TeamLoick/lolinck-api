@@ -1,15 +1,13 @@
-import aiohttp
-import asyncio
+from aiohttp import ClientSession
+from asyncio import run
 from json import load
 from tldextract import extract
-import warnings
-from os.path import split
+from warnings import filterwarnings
 from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
-from bs4.dammit import EncodingDetector
 from typing import TYPE_CHECKING, Dict
 from urllib.parse import urlparse
 
-warnings.filterwarnings('ignore', category=XMLParsedAsHTMLWarning)
+filterwarnings('ignore', category=XMLParsedAsHTMLWarning)
 
 if TYPE_CHECKING:
     from lib.validator import get_status_code
@@ -20,7 +18,7 @@ async def Scrapper(url: str,
                    PHISHING=False,
                    MALWARE=False,
                    IPLOGGER=False) -> dict[str, bool]:
-    async with aiohttp.ClientSession() as session:
+    async with ClientSession() as session:
 
         headers = {
             'User-Agent':

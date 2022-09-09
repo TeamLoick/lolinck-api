@@ -4,6 +4,7 @@ if TYPE_CHECKING:
     from modules.database_search import search
     from lib.validator import url_to_domain
 
+
 # noinspection PyPropertyDefinition
 class LinkInfo:
 
